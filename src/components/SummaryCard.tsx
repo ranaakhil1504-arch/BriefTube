@@ -1,3 +1,6 @@
+import { useState } from "react";
+import ReactMarkdown from "react-markdown";
+
 type SummaryCardProps = {
   videoId: string;
   summary: string;
@@ -7,10 +10,26 @@ export default function SummaryCard({
   videoId,
   summary,
 }: SummaryCardProps) {
+  const [copied, setCopied] = useState(false);
+
   const thumbnail = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
 
+  async function handleCopy() {
+    try {
+      await navigator.clipboard.writeText(summary);
+
+      setCopied(true);
+
+      setTimeout(() => {
+        setCopied(false);
+      }, 2000);
+    } catch {
+      alert("Failed to copy summary.");
+    }
+  }
+
   return (
-    <div className="mx-auto mt-10 w-full max-w-4xl overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-lg">
+    <div className="mx-auto mt-10 w-full max-w-4xl overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xl">
 
       <img
         src={thumbnail}
@@ -20,12 +39,27 @@ export default function SummaryCard({
 
       <div className="p-8">
 
-        <h2 className="mb-6 text-3xl font-bold text-gray-900">
-          📄 AI Video Summary
-        </h2>
+        <div className="mb-6 flex items-center justify-between">
 
-        <div className="mb-6 rounded-lg bg-gray-100 p-4">
-          <p className="text-sm font-semibold text-gray-500">
+          <h2 className="text-3xl font-bold text-gray-900">
+            📄 AI Summary
+          </h2>
+
+          <button
+            onClick={handleCopy}
+            className={`rounded-lg px-4 py-2 font-medium transition ${
+              copied
+                ? "bg-green-600 text-white"
+                : "bg-blue-600 text-white hover:bg-blue-700"
+            }`}
+          >
+            {copied ? "✅ Copied!" : "📋 Copy"}
+          </button>
+
+        </div>
+
+        <div className="mb-6 rounded-xl bg-gray-100 p-4">
+          <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
             Video ID
           </p>
 
@@ -34,14 +68,8 @@ export default function SummaryCard({
           </p>
         </div>
 
-        <div className="rounded-lg bg-blue-50 p-6">
-          <h3 className="mb-3 text-xl font-semibold text-blue-900">
-            Summary
-          </h3>
-
-          <p className="leading-8 text-gray-700">
-            {summary}
-          </p>
+        <div className="prose prose-lg max-w-none rounded-xl bg-blue-50 p-6">
+          <ReactMarkdown>{summary}</ReactMarkdown>
         </div>
 
       </div>
