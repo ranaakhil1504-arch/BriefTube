@@ -1,43 +1,54 @@
+import { useEffect, useState } from "react";
+
+const messages = [
+  "🎥 Fetching video...",
+  "📝 Extracting transcript...",
+  "🤖 Gemini AI is analyzing...",
+  "✨ Writing your beautiful summary...",
+];
+
 export default function LoadingSpinner() {
+  const [index, setIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setIndex((prev) => (prev + 1) % messages.length);
+    }, 2500);
+
+    return () => clearInterval(interval);
+  }, []);
+
   return (
-    <div className="mx-auto mt-10 w-full max-w-3xl rounded-2xl border border-blue-100 bg-white p-8 shadow-lg">
+    <div className="mx-auto mt-12 w-full max-w-3xl rounded-3xl border border-blue-100 bg-white p-10 shadow-2xl">
 
-      <div className="flex items-center gap-4">
+      <div className="flex flex-col items-center">
 
-        <div className="h-12 w-12 animate-spin rounded-full border-4 border-blue-200 border-t-blue-600"></div>
+        <div className="mb-6 h-16 w-16 animate-spin rounded-full border-4 border-blue-200 border-t-blue-600"></div>
 
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900">
-            🧠 BriefTube AI is Working...
-          </h2>
+        <h2 className="text-3xl font-bold text-gray-900">
+          Generating Summary...
+        </h2>
 
-          <p className="mt-1 text-gray-500">
-            This usually takes 5–15 seconds.
-          </p>
+        <p className="mt-3 text-lg text-blue-600 transition-all duration-500">
+          {messages[index]}
+        </p>
+
+        <div className="mt-8 h-3 w-full overflow-hidden rounded-full bg-gray-200">
+
+          <div className="h-full w-full animate-pulse rounded-full bg-gradient-to-r from-blue-500 via-violet-500 to-blue-500"></div>
+
         </div>
+
+        <p className="mt-6 text-gray-500">
+          Usually takes 5–15 seconds.
+        </p>
+
+        <p className="mt-2 text-sm text-gray-400">
+          Please don't refresh or close this page.
+        </p>
 
       </div>
 
-      <div className="mt-8 space-y-4">
-
-        <div className="flex items-center gap-3">
-          <span className="text-xl">✅</span>
-          <p className="text-gray-700">Validating YouTube URL</p>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <span className="text-xl">📄</span>
-          <p className="text-gray-700">Fetching video transcript</p>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <span className="text-xl">🤖</span>
-          <p className="font-semibold text-blue-600">
-            Gemini AI is generating your summary...
-          </p>
-        </div>
-
-      </div>
     </div>
   );
 }

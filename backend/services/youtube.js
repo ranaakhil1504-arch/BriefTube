@@ -1,9 +1,17 @@
-import { YoutubeTranscript } from "youtube-transcript";
+export async function getVideoInfo(videoId) {
+  const url = `https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`;
 
-export async function getTranscript(videoId) {
-  const transcript = await YoutubeTranscript.fetchTranscript(videoId);
+  const response = await fetch(url);
 
-  return transcript
-    .map(item => item.text)
-    .join(" ");
+  if (!response.ok) {
+    throw new Error("Failed to fetch video information.");
+  }
+
+  const data = await response.json();
+
+  return {
+    title: data.title,
+    channel: data.author_name,
+    thumbnail: data.thumbnail_url,
+  };
 }

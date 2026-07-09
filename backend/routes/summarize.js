@@ -1,6 +1,7 @@
+import { getVideoInfo } from "../services/youtube.js";
 import express from "express";
 import { generateSummary } from "../services/gemini.js";
-import { getTranscript } from "../services/youtube.js";
+import { getTranscript } from "../services/transcript.js";
 import { extractVideoId } from "../utils/extractVideoId.js";
 
 const router = express.Router();
@@ -25,14 +26,18 @@ router.post("/", async (req, res) => {
       });
     }
 
-    const transcript = await getTranscript(videoId);
+    const [transcript, video] = await Promise.all([
+  getTranscript(videoId),
+  getVideoInfo(videoId),
+]);
 
-    const summary = await generateSummary(transcript);
+const summary = await generateSummary(transcript);
 
-    res.json({
-      success: true,
-      summary,
-    });
+   res.json({
+  success: true,
+  summary,
+  video,
+});
 
   } catch (error) {
     console.error(error);
