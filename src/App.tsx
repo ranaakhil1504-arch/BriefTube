@@ -1,43 +1,53 @@
 import { useState } from "react";
-
+import { extractVideoId } from "./utils/youtube";
 import Navbar from "./components/Navbar";
 import Hero from "./components/Hero";
 import SummaryCard from "./components/SummaryCard";
 import LoadingSpinner from "./components/LoadingSpinner";
 
+import { generateSummary } from "./services/api";
+
 function App() {
-  const [videoId, setVideoId] = useState("");
   const [summary, setSummary] = useState("");
   const [loading, setLoading] = useState(false);
-
-  function generateSummary(id: string) {
+const [videoId, setVideoId] = useState("");
+  async function handleGenerate(url: string) {
+  try {
     setLoading(true);
+    setSummary("");
 
-    setTimeout(() => {
-      setVideoId(id);
+    const id = extractVideoId(url);
 
-      setSummary(
-        "This is a demo AI summary. In the next version, Google Gemini AI will generate a real summary of the YouTube video."
-      );
+    if (!id) {
+      throw new Error("Invalid YouTube URL");
+    }
 
-      setLoading(false);
-    }, 2000);
+    setVideoId(id);
+
+    const result = await generateSummary(url);
+
+    setSummary(result);
+
+  } catch (error) {
+    alert(error instanceof Error ? error.message : "Something went wrong");
+  } finally {
+    setLoading(false);
   }
-
+}
   return (
     <>
       <Navbar />
 
-      <Hero onGenerate={generateSummary} />
+      <Hero onGenerate={handleGenerate} />
 
       {loading && <LoadingSpinner />}
 
-      {!loading && videoId && (
-        <SummaryCard
-          videoId={videoId}
-          summary={summary}
-        />
-      )}
+      {summary && (
+  <SummaryCard
+    videoId={videoId}
+    summary={summary}
+  />
+)}
     </>
   );
 }

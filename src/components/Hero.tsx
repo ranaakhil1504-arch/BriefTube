@@ -1,7 +1,7 @@
 import UrlInput from "./UrlInput";
 
 type HeroProps = {
-  onGenerate: (videoId: string) => void;
+  onGenerate: (url: string) => void;
 };
 
 export default function Hero({ onGenerate }: HeroProps) {

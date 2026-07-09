@@ -2,7 +2,7 @@ import { useState } from "react";
 import { extractVideoId } from "../utils/youtube";
 
 type UrlInputProps = {
-  onGenerate: (videoId: string) => void;
+  onGenerate: (url: string) => void;
 };
 
 export default function UrlInput({ onGenerate }: UrlInputProps) {
@@ -24,11 +24,11 @@ export default function UrlInput({ onGenerate }: UrlInputProps) {
 
     setError("");
 
-    onGenerate(videoId);
+    onGenerate(url);
   }
 
   return (
-    <div className="mx-auto mt-10 flex w-full max-w-2xl flex-col gap-4">
+    <div className="mt-10 mx-auto flex w-full max-w-2xl flex-col gap-4">
       <div className="flex flex-col gap-4 md:flex-row">
         <input
           type="text"
