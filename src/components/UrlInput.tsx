@@ -1,12 +1,15 @@
 import { useState } from "react";
 import { extractVideoId } from "../utils/youtube";
 
-export default function UrlInput() {
+type UrlInputProps = {
+  onGenerate: (videoId: string) => void;
+};
+
+export default function UrlInput({ onGenerate }: UrlInputProps) {
   const [url, setUrl] = useState("");
   const [error, setError] = useState("");
 
   function handleSubmit() {
-    console.log("Button clicked");
     if (!url.trim()) {
       setError("Please enter a YouTube URL.");
       return;
@@ -21,13 +24,11 @@ export default function UrlInput() {
 
     setError("");
 
-    console.log("Video ID:", videoId);
-
-    alert("✅ URL is valid!");
+    onGenerate(videoId);
   }
 
   return (
-    <div className="mt-10 mx-auto flex w-full max-w-2xl flex-col gap-4">
+    <div className="mx-auto mt-10 flex w-full max-w-2xl flex-col gap-4">
       <div className="flex flex-col gap-4 md:flex-row">
         <input
           type="text"
