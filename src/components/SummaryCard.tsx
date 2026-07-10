@@ -1,6 +1,8 @@
 import { useState } from "react";
 import ReactMarkdown from "react-markdown";
 import { jsPDF } from "jspdf";
+import html2canvas from "html2canvas";
+import PdfTemplate from "./PdfTemplate";
 import toast from "react-hot-toast";
 import {
   Copy,
@@ -129,31 +131,40 @@ toast.success("TXT downloaded!");
 toast.success("Markdown downloaded!");
   }
 
-  function handleDownloadPdf() {
+async function handleDownloadPdf() {
+  const element = document.getElementById("pdf-template");
 
-    const doc = new jsPDF();
-
-    doc.setFontSize(18);
-
-    doc.setFont("helvetica", "bold");
-
-    doc.text(video.title, 15, 20);
-
-    doc.setFontSize(12);
-
-    doc.setFont("helvetica", "normal");
-
-    doc.text(`Channel: ${video.channel}`, 15, 30);
-
-    const lines = doc.splitTextToSize(summary, 180);
-
-    doc.text(lines, 15, 45);
-
-    doc.save(`${video.title}.pdf`);
-
-toast.success("PDF downloaded!");
-
+  if (!element) {
+    toast.error("PDF template not found.");
+    return;
   }
+
+  toast.loading("Generating PDF...", {
+    id: "pdf",
+  });
+
+  const canvas = await html2canvas(element, {
+    scale: 2,
+    useCORS: true,
+    backgroundColor: "#ffffff",
+  });
+
+  const imgData = canvas.toDataURL("image/png");
+
+  const pdf = new jsPDF("p", "mm", "a4");
+
+  const pdfWidth = 210;
+  const pdfHeight =
+    (canvas.height * pdfWidth) / canvas.width;
+
+  pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+
+  pdf.save(`${video.title}.pdf`);
+
+  toast.success("Professional PDF downloaded!", {
+    id: "pdf",
+  });
+}
 
   return (
            <div className="animate-summary mx-auto mt-10 w-full max-w-6xl overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl">
@@ -429,7 +440,12 @@ code({ children, className }) {
                   </div>
 
       </div>
-
+<div className="fixed -left-[9999px] top-0">
+  <PdfTemplate
+    video={video}
+    summary={summary}
+  />
+</div>
     </div>
   );
 }
