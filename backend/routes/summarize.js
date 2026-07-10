@@ -26,8 +26,8 @@ router.post("/", async (req, res) => {
       });
     }
 
-    const [transcript, video] = await Promise.all([
-  getTranscript(videoId),
+ const [transcript, video] = await Promise.all([
+  getTranscript(url),
   getVideoInfo(videoId),
 ]);
 
