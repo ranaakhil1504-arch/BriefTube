@@ -1,7 +1,7 @@
 import { useState } from "react";
 import ReactMarkdown from "react-markdown";
 import { jsPDF } from "jspdf";
-
+import toast from "react-hot-toast";
 import {
   Copy,
   Check,
@@ -16,11 +16,13 @@ import type { VideoInfo } from "../services/api";
 type SummaryCardProps = {
   video: VideoInfo;
   summary: string;
+  onClear: () => void;
 };
 
 export default function SummaryCard({
   video,
   summary,
+  onClear,
 }: SummaryCardProps) {
 
   const [copied, setCopied] = useState(false);
@@ -32,7 +34,7 @@ export default function SummaryCard({
       await navigator.clipboard.writeText(summary);
 
       setCopied(true);
-
+toast.success("Summary copied!");
       setTimeout(() => {
 
         setCopied(false);
@@ -47,6 +49,24 @@ export default function SummaryCard({
 
   }
 
+async function handleShare() {
+  try {
+    if (navigator.share) {
+      await navigator.share({
+        title: video.title,
+        text: summary,
+      });
+
+      toast.success("Summary shared!");
+    } else {
+      await navigator.clipboard.writeText(summary);
+
+      toast.success("Summary copied for sharing!");
+    }
+  } catch {
+    toast.error("Sharing cancelled.");
+  }
+}
   function downloadFile(
 
     content: string,
@@ -92,7 +112,7 @@ export default function SummaryCard({
       "text/plain;charset=utf-8"
 
     );
-
+toast.success("TXT downloaded!");
   }
 
   function handleDownloadMarkdown() {
@@ -106,7 +126,7 @@ export default function SummaryCard({
       "text/markdown;charset=utf-8"
 
     );
-
+toast.success("Markdown downloaded!");
   }
 
   function handleDownloadPdf() {
@@ -131,10 +151,12 @@ export default function SummaryCard({
 
     doc.save(`${video.title}.pdf`);
 
+toast.success("PDF downloaded!");
+
   }
 
   return (
-           <div className="mx-auto mt-12 w-full max-w-6xl">
+           <div className="animate-summary mx-auto mt-10 w-full max-w-6xl overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl">
 
       <div className="overflow-hidden rounded-[32px] border border-white/60 bg-white/90 shadow-2xl backdrop-blur-xl">
 
@@ -253,7 +275,19 @@ export default function SummaryCard({
                 <Download className="h-5 w-5" />
                 PDF
               </button>
-
+              
+                <button
+  onClick={handleShare}
+  className="rounded-lg bg-emerald-600 px-4 py-2 font-medium text-white transition hover:bg-emerald-700"
+>
+  🔗 Share
+</button>
+<button
+  onClick={onClear}
+  className="rounded-lg bg-gray-600 px-4 py-2 font-medium text-white transition hover:bg-gray-700"
+>
+  🗑 Clear
+</button>
             </div>
 
           </div>

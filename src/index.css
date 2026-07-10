@@ -1,1 +1,89 @@
 @import "tailwindcss";
+@keyframes floating {
+
+  0% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-6px);
+  }
+
+  100% {
+    transform: translateY(0px);
+  }
+
+}
+
+.animate-floating{
+  animation:floating 3.5s ease-in-out infinite;
+}
+
+
+/* =======================================
+   HERO GLOW
+======================================= */
+
+@keyframes gradientMove {
+
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
+
+}
+
+.hero-glow{
+
+  width:520px;
+  height:220px;
+
+  left:50%;
+  top:50%;
+
+  transform:translate(-50%,-50%);
+
+  border-radius:9999px;
+
+  background:linear-gradient(
+      90deg,
+      rgba(37,99,235,.35),
+      rgba(139,92,246,.35),
+      rgba(236,72,153,.30),
+      rgba(37,99,235,.35)
+  );
+
+  background-size:300% 300%;
+
+  animation:gradientMove 8s ease infinite;
+
+}
+
+/* ======================================
+   SUMMARY CARD ANIMATION
+====================================== */
+
+@keyframes summaryFade {
+
+  from {
+    opacity: 0;
+    transform: translateY(35px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0px);
+  }
+
+}
+
+.animate-summary{
+  animation:summaryFade .55s ease;
+}
