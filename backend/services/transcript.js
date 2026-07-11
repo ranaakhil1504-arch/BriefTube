@@ -1,28 +1,45 @@
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 export async function getTranscript(videoUrl) {
-  const response = await fetch(
-    `https://api.supadata.ai/v1/transcript?url=${encodeURIComponent(
-      videoUrl
-    )}&text=true&mode=auto`,
-    {
-      headers: {
-        "x-api-key": process.env.SUPADATA_API_KEY,
-      },
-    }
-  );
+  const MAX_RETRIES = 5;
 
-  if (response.status === 202) {
-    const job = await response.json();
-    throw new Error(
-      `Transcript is being generated. Job ID: ${job.jobId}.`
+  for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+    const response = await fetch(
+      `https://api.supadata.ai/v1/transcript?url=${encodeURIComponent(
+        videoUrl
+      )}&text=true&mode=auto`,
+      {
+        headers: {
+          "x-api-key": process.env.SUPADATA_API_KEY,
+        },
+      }
     );
+
+    // Transcript is still generating
+    if (response.status === 202) {
+      console.log(
+        `⏳ Transcript not ready (Attempt ${attempt}/${MAX_RETRIES}). Retrying in 2 seconds...`
+      );
+
+      await sleep(2000);
+
+      continue;
+    }
+
+    // Other errors
+    if (!response.ok) {
+      const error = await response.text();
+      throw new Error(error);
+    }
+
+    const data = await response.json();
+
+    return data.content;
   }
 
-  if (!response.ok) {
-    const error = await response.text();
-    throw new Error(error);
-  }
-
-  const data = await response.json();
-
-  return data.content;
+  throw new Error(
+    "Transcript is still being generated. Please try again in a few moments."
+  );
 }

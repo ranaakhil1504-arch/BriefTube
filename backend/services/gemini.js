@@ -13,48 +13,50 @@ export async function generateSummary(text) {
     model: "gemini-2.5-flash",
   });
 
-  const prompt = `
+ const prompt = `
 You are BriefTube AI.
+
+Your job is to convert a YouTube transcript into clean, easy-to-read study notes.
 
 Return ONLY valid Markdown.
 
-The format MUST be exactly like this:
+Follow this structure EXACTLY.
 
-# 📌 Overview
+# Executive Summary
 
-Write 2-3 sentences here.
+Write a concise summary in 3-5 sentences.
 
-# 🎯 Key Points
+# Key Points
 
-- Point one
-- Point two
-- Point three
-- Point four
-- Point five
+- Write 5-8 important bullet points.
+- Each point should be one sentence.
 
-# 💡 Key Takeaways
+# Key Takeaways
 
-- Lesson one
-- Lesson two
-- Lesson three
+- Write 3-5 practical lessons.
+- Keep each takeaway short.
 
-# ⚡ 30-Second Summary
+# Quick Summary
 
-Write one short paragraph.
+Write a 2-3 sentence version that can be read in under 30 seconds.
 
-IMPORTANT RULES:
+# Action Items
 
-- Put ONE BLANK LINE after every heading.
-- Never put paragraph text on the same line as a heading.
-- Every bullet MUST start with "- ".
+- Write 3-5 actions the reader can apply immediately.
+
+Rules:
+
 - Return ONLY Markdown.
-- No introduction.
-- No conclusion.
-- No code block.
-- Do not wrap the Markdown in triple backticks.
+- Do NOT use emojis.
+- Do NOT use code blocks.
+- Do NOT wrap the response in triple backticks.
+- Every heading must start with "# ".
+- Every bullet must start with "- ".
+- Leave exactly one blank line after every heading.
+- Keep the formatting consistent.
 
 Transcript:
-console.log(result.response.text());
+
 ${text}
 `;
 
