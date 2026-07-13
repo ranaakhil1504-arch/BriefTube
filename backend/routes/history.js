@@ -9,7 +9,17 @@ router.get("/:userId", async (req, res) => {
 
     const { data, error } = await supabase
       .from("user_summaries")
-      .select("*")
+      .select(
+`
+id,
+video_id,
+title,
+channel,
+thumbnail,
+summary,
+created_at
+`
+)
       .eq("user_id", userId)
       .order("created_at", { ascending: false });
 
@@ -29,5 +39,29 @@ router.get("/:userId", async (req, res) => {
     });
   }
 });
+router.delete("/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
 
+    const { error } = await supabase
+      .from("user_summaries")
+      .delete()
+      .eq("id", id);
+
+    if (error) throw error;
+
+    res.json({
+      success: true,
+      message: "Summary deleted successfully",
+    });
+
+  } catch (err) {
+    console.error(err);
+
+    res.status(500).json({
+      success: false,
+      message: err.message,
+    });
+  }
+});
 export default router;
