@@ -1,8 +1,14 @@
-import { getVideoInfo } from "../services/youtube.js";
 import express from "express";
+
+import { getVideoInfo } from "../services/youtube.js";
 import { generateSummary } from "../services/gemini.js";
 import { getTranscript } from "../services/transcript.js";
 import { extractVideoId } from "../utils/extractVideoId.js";
+
+import {
+  getCachedVideo,
+  saveVideo,
+} from "../services/cacheService.js";
 
 const router = express.Router();
 
@@ -26,23 +32,78 @@ router.post("/", async (req, res) => {
       });
     }
 
- const [transcript, video] = await Promise.all([
-  getTranscript(url),
-  getVideoInfo(videoId),
-]);
+    // ======================================
+    // 1. CHECK CACHE
+    // ======================================
 
-const summary = await generateSummary(transcript);
+    const cached = await getCachedVideo(videoId);
 
-   res.json({
-  success: true,
-  summary,
-  video,
-});
+    if (cached) {
+      console.log("⚡ Cache Hit");
+
+      return res.json({
+        success: true,
+        summary: cached.summary,
+        video: {
+          title: cached.title,
+          channel: cached.channel,
+          thumbnail: cached.thumbnail,
+        },
+        cached: true,
+      });
+    }
+
+    console.log("❌ Cache Miss");
+
+    // ======================================
+    // 2. FETCH TRANSCRIPT + VIDEO INFO
+    // ======================================
+
+    const [transcript, video] = await Promise.all([
+      getTranscript(url),
+      getVideoInfo(videoId),
+    ]);
+
+    console.log("✅ Transcript fetched");
+
+    // ======================================
+    // 3. GENERATE SUMMARY
+    // ======================================
+
+    const summary = await generateSummary(transcript);
+
+    console.log("✅ Summary generated");
+
+    // ======================================
+    // 4. SAVE TO SUPABASE
+    // ======================================
+
+    await saveVideo({
+      video_id: videoId,
+      title: video.title,
+      channel: video.channel,
+      thumbnail: video.thumbnail,
+      transcript,
+      summary,
+    });
+
+    console.log("✅ Saved to Supabase");
+
+    // ======================================
+    // 5. RETURN RESPONSE
+    // ======================================
+
+    return res.json({
+      success: true,
+      summary,
+      video,
+      cached: false,
+    });
 
   } catch (error) {
     console.error(error);
 
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: error.message || "Something went wrong",
     });
