@@ -4,7 +4,7 @@ import { getVideoInfo } from "../services/youtube.js";
 import { generateSummary } from "../services/ai/aiRouter.js";
 import { getTranscript } from "../services/transcript.js";
 import { extractVideoId } from "../utils/extractVideoId.js";
-
+import { saveUserSummary } from "../services/userSummaryService.js";
 import {
   getCachedVideo,
   saveVideo,
@@ -14,7 +14,7 @@ const router = express.Router();
 
 router.post("/", async (req, res) => {
   try {
-    const { url } = req.body;
+    const { url, userId } = req.body;
 
     if (!url) {
       return res.status(400).json({
@@ -77,6 +77,27 @@ router.post("/", async (req, res) => {
     // ======================================
     // 4. SAVE TO SUPABASE
     // ======================================
+// ======================================
+// 5. SAVE TO USER HISTORY
+// ======================================
+
+if (userId) {
+  try {
+    await saveUserSummary({
+      user_id: userId,
+      video_id: videoId,
+      title: video.title,
+      channel: video.channel,
+      thumbnail: video.thumbnail,
+      summary,
+    });
+
+    console.log("✅ Saved to User History");
+  } catch (error) {
+    console.error("User history save failed:", error.message);
+  }
+}
+
 
     await saveVideo({
       video_id: videoId,
@@ -89,10 +110,9 @@ router.post("/", async (req, res) => {
 
     console.log("✅ Saved to Supabase");
 
-    // ======================================
-    // 5. RETURN RESPONSE
-    // ======================================
-
+   // ======================================
+// 6. RETURN RESPONSE
+// ======================================
     return res.json({
       success: true,
       summary,

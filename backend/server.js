@@ -1,7 +1,7 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-
+import historyRoute from "./routes/history.js";
 import summarizeRoute from "./routes/summarize.js";
 import supabase from "./config/supabase.js";
 dotenv.config();
@@ -45,7 +45,7 @@ app.get("/api/test-supabase", async (req, res) => {
   }
 });
 app.use("/api/summarize", summarizeRoute);
-
+app.use("/api/history", historyRoute);
 app.listen(PORT, () => {
   console.log(`✅ Server running on http://localhost:${PORT}`);
 });
