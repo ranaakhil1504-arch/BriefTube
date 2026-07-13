@@ -1,7 +1,7 @@
 import express from "express";
 
 import { getVideoInfo } from "../services/youtube.js";
-import { generateSummary } from "../services/gemini.js";
+import { generateSummary } from "../services/ai/aiRouter.js";
 import { getTranscript } from "../services/transcript.js";
 import { extractVideoId } from "../utils/extractVideoId.js";
 
