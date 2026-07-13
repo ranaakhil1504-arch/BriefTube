@@ -1,8 +1,31 @@
+import { getYoutubeCaptions } from "./youtubeCaptions.js";
+import { extractVideoId } from "../utils/extractVideoId.js";
+
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 export async function getTranscript(videoUrl) {
+  // =====================================
+  // 1. TRY FREE YOUTUBE CAPTIONS
+  // =====================================
+
+  const videoId = extractVideoId(videoUrl);
+
+  if (videoId) {
+    const captions = await getYoutubeCaptions(videoId);
+
+    if (captions) {
+      return captions;
+    }
+
+    console.log("➡️ Falling back to Supadata...");
+  }
+
+  // =====================================
+  // 2. SUPADATA FALLBACK
+  // =====================================
+
   const MAX_RETRIES = 5;
 
   for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
@@ -17,7 +40,6 @@ export async function getTranscript(videoUrl) {
       }
     );
 
-    // Transcript is still generating
     if (response.status === 202) {
       console.log(
         `⏳ Transcript not ready (Attempt ${attempt}/${MAX_RETRIES}). Retrying in 2 seconds...`
@@ -28,13 +50,14 @@ export async function getTranscript(videoUrl) {
       continue;
     }
 
-    // Other errors
     if (!response.ok) {
       const error = await response.text();
       throw new Error(error);
     }
 
     const data = await response.json();
+
+    console.log("✅ Transcript fetched from Supadata");
 
     return data.content;
   }
