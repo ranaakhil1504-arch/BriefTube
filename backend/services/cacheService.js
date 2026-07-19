@@ -1,4 +1,5 @@
 import supabase from "../config/supabase.js";
+import logger from "../utils/logger.js";
 
 export async function getCachedVideo(videoId) {
   const { data, error } = await supabase
@@ -15,11 +16,9 @@ export async function getCachedVideo(videoId) {
 }
 
 export async function saveVideo(video) {
-  const { error } = await supabase
-    .from("videos")
-    .upsert(video);
+  const { error } = await supabase.from("videos").upsert(video);
 
   if (error) {
-    console.error("Cache Save Error:", error.message);
+    logger.error("Cache save error", { error: error.message });
   }
 }

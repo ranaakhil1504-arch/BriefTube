@@ -1,5 +1,6 @@
 import { getYoutubeCaptions } from "./youtubeCaptions.js";
 import { extractVideoId } from "../utils/extractVideoId.js";
+import logger from "../utils/logger.js";
 
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -9,7 +10,6 @@ export async function getTranscript(videoUrl) {
   // =====================================
   // 1. TRY FREE YOUTUBE CAPTIONS
   // =====================================
-
   const videoId = extractVideoId(videoUrl);
 
   if (videoId) {
@@ -19,13 +19,12 @@ export async function getTranscript(videoUrl) {
       return captions;
     }
 
-    console.log("➡️ Falling back to Supadata...");
+    logger.info("Falling back to Supadata...");
   }
 
   // =====================================
   // 2. SUPADATA FALLBACK
   // =====================================
-
   const MAX_RETRIES = 5;
 
   for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
@@ -41,8 +40,8 @@ export async function getTranscript(videoUrl) {
     );
 
     if (response.status === 202) {
-      console.log(
-        `⏳ Transcript not ready (Attempt ${attempt}/${MAX_RETRIES}). Retrying in 2 seconds...`
+      logger.info(
+        `Transcript not ready (attempt ${attempt}/${MAX_RETRIES}). Retrying in 2s...`
       );
 
       await sleep(2000);
@@ -57,7 +56,7 @@ export async function getTranscript(videoUrl) {
 
     const data = await response.json();
 
-    console.log("✅ Transcript fetched from Supadata");
+    logger.info("Transcript fetched from Supadata");
 
     return data.content;
   }

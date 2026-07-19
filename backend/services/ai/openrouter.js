@@ -1,17 +1,21 @@
+import { fetchWithTimeout } from "../../utils/fetchWithTimeout.js";
+import logger from "../../utils/logger.js";
+
+const TIMEOUT_MS = Number(process.env.AI_TIMEOUT_MS) || 20000;
+
 const MODELS = [
   "openai/gpt-oss-20b:free",
-    "meta-llama/llama-3.3-70b-instruct:free",
+  "meta-llama/llama-3.3-70b-instruct:free",
   "google/gemma-2-9b-it:free",
-  
   "qwen/qwen3-coder:free",
 ];
 
 export async function generateWithOpenRouter(transcript) {
   for (const model of MODELS) {
     try {
-      console.log(`🚀 Trying OpenRouter model: ${model}`);
+      logger.info(`Trying OpenRouter model: ${model}`);
 
-      const response = await fetch(
+      const response = await fetchWithTimeout(
         "https://openrouter.ai/api/v1/chat/completions",
         {
           method: "POST",
@@ -33,7 +37,8 @@ export async function generateWithOpenRouter(transcript) {
               },
             ],
           }),
-        }
+        },
+        TIMEOUT_MS
       );
 
       if (!response.ok) {
@@ -42,12 +47,11 @@ export async function generateWithOpenRouter(transcript) {
 
       const data = await response.json();
 
-      console.log(`✅ Success with ${model}`);
+      logger.info(`Success with ${model}`);
 
       return data.choices[0].message.content;
-
     } catch (err) {
-      console.log(`❌ ${model} failed`);
+      logger.warn(`OpenRouter model failed: ${model}`, { error: err.message });
     }
   }
 

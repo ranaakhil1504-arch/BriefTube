@@ -1,22 +1,18 @@
 import { YoutubeTranscript } from "youtube-transcript";
+import logger from "../utils/logger.js";
 
 export async function getYoutubeCaptions(videoId) {
   try {
     const transcript = await YoutubeTranscript.fetchTranscript(videoId);
 
-    const text = transcript
-      .map((item) => item.text)
-      .join(" ");
+    const text = transcript.map((item) => item.text).join(" ");
 
-    console.log("✅ Free YouTube captions found");
+    logger.info("Free YouTube captions found", { videoId });
 
     return text;
-
   } catch (error) {
-
-    console.log("❌ No free captions available");
+    logger.info("No free captions available", { videoId, error: error.message });
 
     return null;
-
   }
 }

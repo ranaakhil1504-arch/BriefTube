@@ -1,5 +1,16 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
+const TIMEOUT_MS = Number(process.env.AI_TIMEOUT_MS) || 20000;
+
+function withTimeout(promise, ms, label) {
+  return Promise.race([
+    promise,
+    new Promise((_, reject) =>
+      setTimeout(() => reject(new Error(`${label} timed out after ${ms}ms`)), ms)
+    ),
+  ]);
+}
+
 export async function generateSummary(text) {
   const apiKey = process.env.GEMINI_API_KEY;
 
@@ -13,7 +24,7 @@ export async function generateSummary(text) {
     model: "gemini-2.5-flash",
   });
 
- const prompt = `
+  const prompt = `
 You are BriefTube AI.
 
 Your job is to convert a YouTube transcript into clean, easy-to-read study notes.
@@ -60,7 +71,11 @@ Transcript:
 ${text}
 `;
 
-  const result = await model.generateContent(prompt);
+  const result = await withTimeout(
+    model.generateContent(prompt),
+    TIMEOUT_MS,
+    "Gemini"
+  );
 
   return result.response.text();
 }

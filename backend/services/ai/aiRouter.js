@@ -1,44 +1,33 @@
 import { generateSummary as generateWithGemini } from "./gemini.js";
 import { generateWithOpenRouter } from "./openrouter.js";
 import { generateWithGroq } from "./groq.js";
-
+import logger from "../../utils/logger.js";
 
 export async function generateSummary(transcript) {
   // =====================================
   // 1. GEMINI
   // =====================================
-
   try {
-    console.log("🤖 Trying Gemini...");
-
+    logger.info("Trying Gemini...");
     return await generateWithGemini(transcript);
-
   } catch (error) {
-
-    console.log("❌ Gemini failed");
-    console.log(error.message);
+    logger.warn("Gemini failed", { error: error.message });
   }
 
   // =====================================
   // 2. GROQ
   // =====================================
-
   try {
-    console.log("⚡ Trying Groq...");
-
+    logger.info("Trying Groq...");
     return await generateWithGroq(transcript);
-
   } catch (error) {
-
-    console.log("❌ Groq failed");
-    console.log(error.message);
+    logger.warn("Groq failed", { error: error.message });
   }
 
   // =====================================
   // 3. OPENROUTER
   // =====================================
-
-  console.log("🔄 Switching to OpenRouter...");
+  logger.info("Switching to OpenRouter...");
 
   return await generateWithOpenRouter(transcript);
 }
